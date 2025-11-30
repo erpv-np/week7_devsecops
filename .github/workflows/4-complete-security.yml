@@ -18,9 +18,20 @@ jobs:
     name: "1️⃣ SAST - Code Analysis"
     runs-on: ubuntu-latest
     
+    strategy:
+      fail-fast: false
+      matrix:
+        language: [ 'python' ]
+    
     steps:
       - name: Checkout code
         uses: actions/checkout@v4
+      
+      - name: Initialize CodeQL
+        uses: github/codeql-action/init@v3
+        with:
+          languages: ${{ matrix.language }}
+          queries: security-extended
       
       - name: Set up Python
         uses: actions/setup-python@v5
@@ -32,20 +43,9 @@ jobs:
           python -m pip install --upgrade pip
           pip install -r requirements.txt
       
-      - name: Run Snyk Code Scan (SAST)
-        continue-on-error: true
-        uses: snyk/actions/python@master
-        env:
-          SNYK_TOKEN: ${{ secrets.SNYK_TOKEN }}
+      - name: Perform CodeQL Analysis (SAST)
+        uses: github/codeql-action/analyze@v3
         with:
-          command: code test
-          args: --sarif-file-output=snyk-code.sarif
-      
-      - name: Upload SAST results
-        uses: github/codeql-action/upload-sarif@v4
-        if: always()
-        with:
-          sarif_file: snyk-code.sarif
           category: sast
 
   # JOB 2: SCA - Dependency Analysis
@@ -171,7 +171,7 @@ jobs:
           echo "# 🔒 Security Scan Summary" >> $GITHUB_STEP_SUMMARY
           echo "" >> $GITHUB_STEP_SUMMARY
           echo "## Scan Results" >> $GITHUB_STEP_SUMMARY
-          echo "- ✅ SAST (Static Analysis): Completed" >> $GITHUB_STEP_SUMMARY
+          echo "- ✅ SAST (CodeQL Analysis): Completed" >> $GITHUB_STEP_SUMMARY
           echo "- ✅ SCA (Dependency Check): Completed" >> $GITHUB_STEP_SUMMARY
           echo "- ✅ DAST (Dynamic Testing): Completed" >> $GITHUB_STEP_SUMMARY
           echo "" >> $GITHUB_STEP_SUMMARY
