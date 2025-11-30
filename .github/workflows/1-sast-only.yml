@@ -54,3 +54,7 @@ jobs:
         with:
           sarif_file: snyk-code.sarif
           category: sast
+
+     # Step 6: Print Directory for Debugging
+      - name: Debug – list output files
+        run: ls -R .
