@@ -15,42 +15,34 @@ jobs:
   sast:
     name: Snyk Code Scan (SAST)
     runs-on: ubuntu-latest
-
+    
     steps:
       # Step 1: Checkout code
       - name: Checkout repository
         uses: actions/checkout@v4
-
-      # Step 2: Set up Python (optional, but fine to keep)
+      
+      # Step 2: Set up Python
       - name: Set up Python
         uses: actions/setup-python@v5
         with:
           python-version: '3.9'
-
-      # Step 3: Install dependencies (optional for Snyk, needed only if your app requires it)
+      
+      # Step 3: Install dependencies
       - name: Install dependencies
         run: |
           python -m pip install --upgrade pip
           if [ -f requirements.txt ]; then pip install -r requirements.txt; fi
-
-      # Step 4: Run Snyk Code Scan and output SARIF
+      
+      # Step 4: Run Snyk Code Scan
       - name: Run Snyk to check code for vulnerabilities
+        continue-on-error: true
         uses: snyk/actions/python@master
-        continue-on-error: true          # Don't stop the job when vulns are found
         env:
           SNYK_TOKEN: ${{ secrets.SNYK_TOKEN }}
         with:
-          command: code test --sarif      # tell Snyk to produce SARIF
+          command: code test
           args: --sarif-file-output=snyk-code.sarif
-
-      # (Optional but VERY helpful) – inspect the SARIF file
-      - name: Debug – list output files
-        if: always()
-        run: |
-          ls -lh
-          echo "Preview of snyk-code.sarif:"
-          head -n 40 snyk-code.sarif || echo "snyk-code.sarif not found"
-
+      
       # Step 5: Upload results to GitHub Security
       - name: Upload SAST results to GitHub Security
         uses: github/codeql-action/upload-sarif@v4
