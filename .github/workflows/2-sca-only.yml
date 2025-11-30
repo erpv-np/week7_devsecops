@@ -47,11 +47,12 @@ jobs:
             --enableRetired
       
       # Step 5: Upload Dependency-Check reports
+      # ✅ Proper artifact naming (hyphens, not underscores)
       - name: Upload Dependency-Check reports
         uses: actions/upload-artifact@v4
         if: always()
         with:
-          name: dependency-check-reports
+          name: sca-reports
           path: reports/
       
       # Step 6: Upload to GitHub Security (if SARIF available)

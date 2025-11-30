@@ -50,10 +50,3 @@ jobs:
         uses: github/codeql-action/analyze@v3
         with:
           category: sast
-      
-      # Step 6: Upload results to GitHub Security
-      - name: Upload CodeQL results
-        uses: github/codeql-action/upload-sarif@v3
-        if: always()
-        with:
-          category: sast
